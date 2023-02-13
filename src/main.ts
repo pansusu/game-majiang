@@ -12,7 +12,7 @@ document.head.appendChild(meta)
 async function setupApp() {
     const app = createApp(App);
     app.use(SocketIO, {
-        connection: 'http://localhost:5173',
+        connection: 'http://localhost',
     });
 
     await setupRouter(app);
