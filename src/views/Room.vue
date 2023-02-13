@@ -17,6 +17,7 @@ import PlayerVo from "@/server/vo/playerVo";
 import MaJiangs from "@/components/MaJiangs.vue";
 import MyPan from "@/components/MyPan.vue";
 import OtherPan from "@/components/OtherPan.vue";
+import { HappyOutline } from "@vicons/ionicons5";
 
 const colors = ["text-red-500", "text-blue-500", "text-green-500"];
 
@@ -27,6 +28,7 @@ const pan = ref<Pan>();
 const myMj = ref<Mj[]>();
 const router = useRouter();
 const message = useMessage();
+const roomMaster = ref("");
 
 const socket: Socket | undefined = inject("socket");
 const uname = sessionStorage.getItem("uname") || "";
@@ -53,6 +55,7 @@ socket?.on(Cons.MSG.ROOM_INFO, (data: RoomVo) => {
 	console.log("roomVue:", room.value);
 	const players = room.value.playersAll;
 	const myPosition = players.findIndex((p) => p.uname == uname);
+	roomMaster.value = data?.playersAll?.[0].uname;
 
 	right_player.value = players[(myPosition + 1) % 4];
 	top_player.value = players[(myPosition + 2) % 4];
@@ -74,6 +77,14 @@ socket?.on(Cons.MSG.ROOM_INFO_COUNT_DOWN, (c: number) => {
  * 启动游戏
  */
 const handleGameStart = () => {
+	if (room.value.playersAll.length < 2) {
+		message.warning("至少要两个人才能开始游戏！");
+		return;
+	}
+	if (roomMaster.value != uname) {
+		message.warning("请提醒房主开始！");
+		return;
+	}
 	socket?.emit(Cons.MSG.GAME_START, uname);
 };
 
@@ -153,11 +164,11 @@ const handleDiscard = (rd: string[]) => {
 	<div class="p-4">
 		<div class="flex justify-between text-lg mb-10">
 			<div>房间号：{{ room?.roomNumber }}</div>
-			<div class="font-bold">{{ uname }}</div>
+			<div class="font-bold">{{ uname }}【{{ uname == roomMaster?'房主':"玩家"}}】</div>
 			<div class="font-bold">剩余牌：{{ myMj?.length }}</div>
 		</div>
 
-		<div class="flex items-center justify-center mb-6 relative">
+		<div v-show="pan" class="flex items-center justify-center mb-6 relative">
 			<div class="bg-green-700 min-w-[1300px] tx-clip h-[500px]"></div>
 
 			<div class="w-[1600px] absolute h-[500px]">
@@ -206,20 +217,29 @@ const handleDiscard = (rd: string[]) => {
 			</div>
 		</div>
 
+		<div v-show="!pan" class="flex items-center justify-center bg-gray-50 shadow py-7 mb-6">
+			<n-space>
+				<div class="text-center" v-for="p,index in room?.playersAll">
+					<div class="text-blue-500">{{ p.uname == roomMaster?'房主':"玩家"+index }}</div>
+					<div
+						class="w-16 h-16 rounded-full bg-green-300 flex flex-col items-center justify-center shadow-md"
+					>
+						<n-icon color="#0e7a0d" size="40">
+							<HappyOutline />
+						</n-icon>
+					</div>
+					<div class="text-green-600 font-bold text-lg">{{ p.uname }}</div>
+				</div>
+			</n-space>
+		</div>
+
 		<!-- 暗杠 ，胡牌， 发牌, 游戏结束，删除房间 -->
 		<div class="flex items-center justify-center w-full">
 			<div class="flex flex-col justify-center items-center">
-				<div class="text-orange-500 text-2xl font-bold mb-5">出牌倒计时： {{ count }}</div>
+				<div v-if="pan" class="text-orange-500 text-2xl font-bold mb-5">出牌倒计时： {{ count }}</div>
 				<n-space>
-					<n-button
-						round
-						size="large"
-						v-if="!pan"
-						class="mr-10"
-						type="primary"
-						@click="handleGameStart"
-					>开始</n-button>
-					<n-button round size="large" type="info" @click="sendDiscard">出牌</n-button>
+					<n-button round size="large" v-if="!pan" type="primary" @click="handleGameStart">开始</n-button>
+					<n-button :disabled="!pan" round size="large" type="info" @click="sendDiscard">出牌</n-button>
 				</n-space>
 			</div>
 		</div>

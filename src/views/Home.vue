@@ -56,8 +56,10 @@ onMounted(() => {
 </script>
 
 <template>
-	<div class="w-full">
-		<div class="p-4">当前登录人：{{ uname }}</div>
+	<div class="w-full px-5">
+		<div
+			class="my-3 py-2 px-4 bg-green-200 text-green-500 w-fit rounded-full font-bold"
+		>当前登录人：{{ uname }}</div>
 		<div class="h-1/4 overflow-y-auto border px-4 py-3">
 			<div>
 				<div class="flex justify-between border-b pb-3">
@@ -79,11 +81,8 @@ onMounted(() => {
 			</div>
 			<div v-else class="text-center mt-3 text-gray-500">暂无房间</div>
 		</div>
-
-		<div class="w-full flex flex-col justify-center items-center">
-			<div class="w-full mt-7 px-10">
-				<n-button @click="newGame">创建游戏</n-button>
-			</div>
-		</div>
+	</div>
+	<div class="w-full flex justify-center items-center my-5 fixed bottom-10">
+		<n-button round type="primary" style="width: 200px;" @click="newGame">创建房间</n-button>
 	</div>
 </template>

@@ -16,10 +16,14 @@ const login = () => {
 	// || sessionStorage.getItem("uname")
 	let user = uname.value || sessionStorage.getItem("uname");
 	let pwd = password.value || sessionStorage.getItem("password");
-	console.log(user + "\n" + pwd);
 
 	if (!user || !pwd) {
 		message.warning("please enter your username and password!");
+		return;
+	}
+
+	if (user.length > 10) {
+		message.warning("Name must not be more than 10 characters.");
 		return;
 	}
 
@@ -53,12 +57,20 @@ socket?.on(Cons.MSG.RECONNECT, (data) => {
 </script>
 
 <template>
-	<div class="h-full w-full flex flex-col justify-center items-center">
-		<div class="flex flex-col items-center w-[400px] shadow-md px-10 py-24 bg-white rounded-md">
+	<div class="h-full flex flex-col justify-center items-center bg-green-50">
+		<div class="flex flex-col items-center w-[400px] shadow-md px-10 pb-24 bg-white rounded-md">
 			<!-- <img class="w-3/5 h-1/2" src="../assets/hdl.png" /> -->
+			<div class="my-10 text-lg">登录</div>
 			<n-input class="mb-10" v-model:value="uname" size="large" round placeholder="输入用户" />
 			<n-input class="mb-10" v-model:value="password" size="large" round placeholder="输入密码" />
-			<n-button type="primary" @click="login">登录</n-button>
+			<n-button
+				type="primary"
+				round
+				size="large"
+				class="w-[400px]"
+				style="width: 100%;"
+				@click="login"
+			>登录</n-button>
 		</div>
 	</div>
 </template>
