@@ -11,7 +11,7 @@ import Mj from "./mj.js";
 import OtherPlayer from "../vo/otherPlayer.js";
 
 const MAX_PLAYER_NUM = 4
-const COUNT_DOWN = 10
+const COUNT_DOWN = 6
 
 export default class Room {
     homePlayers: Array<Player> = [];
