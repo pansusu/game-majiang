@@ -112,24 +112,22 @@ const canDiscard = (): boolean => {
 	}
 
 	// 是否轮到自己
-	if (room.value.currentPlayer == uname) {
-		if (readyDiscard.value.length > 1) {
-			message.warning("没有这种打法!");
-			return false;
-		}
+	if (room.value.currentPlayer == uname && readyDiscard.value.length > 1) {
+		message.warning("没有这种打法!");
+		return false;
+	}
 
-		// 倒计时中，不能打牌
-		if (count.value > 0) {
-			return false;
-		}
-		return true;
-	} else {
-		if (isPengAndGang()) {
-			return true;
-		}
+	// 倒计时中，不能打牌
+	if (count.value > 0) {
+		return false;
+	}
+
+	if (room.value.currentPlayer != uname && !isPengAndGang()) {
 		message.warning("不允许此操作！");
 		return false;
 	}
+
+	return true;
 };
 
 // 别人打的牌是否在自己的牌中有两个以上
