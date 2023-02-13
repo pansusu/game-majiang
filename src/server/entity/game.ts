@@ -8,6 +8,7 @@ import Result from "./result.js";
 import { ReflectType } from "../common.js"
 import Mj from "./mj.js";
 import { PLAYER_STATUS } from "../../infra/enum/global.js";
+import PlayerVo from "../vo/playerVo.js";
 
 export default class Game {
 
@@ -19,10 +20,24 @@ export default class Game {
         // this.words = new Word();
     }
 
+    isInTheGameRoom(player: Player) {
+        if (player.roomNumber) {
+            player.socket.emit(Cons.MSG.GAME_START_IN_ROOM, player.roomNumber);
+            return true
+        }
+        return false
+    }
+
+
+
     createRoom(uname: string) {
-        console.log(uname);
-        const room = new Room()
+        console.log("创建房间：", uname);
         const player: Player = this.players.get(uname)
+        if (this.isInTheGameRoom(player)) {
+            return
+        }
+
+        const room = new Room()
         room.addPlayer(player);
         this.rooms.set(room.roomNumber, room);
         player.socket.emit(Cons.MSG.CREATE_ROOM, { code: 0, msg: 'success' });
@@ -30,11 +45,14 @@ export default class Game {
     }
 
     joinRoom(socket: Socket, uname: string, roomNumber: string) {
-        console.log(uname, '+', roomNumber);
+        console.log("加入房间：", uname, '+', roomNumber);
         if (!uname) {
             return
         }
         const player = this.players.get(uname)
+        if (this.isInTheGameRoom(player)) {
+            return
+        }
         const room: Room = this.rooms.get(roomNumber)
         if (!room) {
             socket.emit(Cons.MSG.MESSAGE, new Result().error("房间不存在!"))
@@ -42,6 +60,54 @@ export default class Game {
         }
         room.joinRoom(player);
         this.showAllRooms()
+    }
+
+    delete_room_force(uname: string) {
+        if (!uname) {
+            return
+        }
+        const player = this.players.get(uname)
+        const roomNumber = player.roomNumber
+        const room: Room = this.rooms.get(roomNumber)
+        this.delete_room(player, room)
+    }
+
+    delete_room(player: Player, room: Room) {
+        console.log("删除房间：", player.uname);
+
+        // 房间里的人都除掉房间号
+        room.homePlayers.forEach(p => {
+            const game_player = this.players.get(p.uname)
+            if (game_player) {
+                game_player.roomNumber = ""
+                game_player.socket.emit(Cons.MSG.DELETE_ROOM)
+            }
+        })
+        const a = this.rooms.delete(room.roomNumber)
+        if (!a) {
+            player.socket.emit(Cons.MSG.MESSAGE, new Result().error("删除房间失败!"))
+        }
+        this.showAllRooms()
+    }
+
+    delete_room_force_by_room({ uname, roomNumber }) {
+        console.log("删除房间：", uname, ':', roomNumber);
+        if (!uname || !roomNumber) {
+            return
+        }
+        const player = this.players.get(uname)
+        if (roomNumber !== player.roomNumber) {
+            player.socket.emit(Cons.MSG.MESSAGE, new Result().error("只有房主能删除!"))
+            return
+        }
+        const room: Room = this.rooms.get(roomNumber)
+        const room_master = room.homePlayers[0]
+        if (uname !== room_master.uname) {
+            player.socket.emit(Cons.MSG.MESSAGE, new Result().error("只有房主能删除!"))
+            return
+        }
+
+        this.delete_room(player, room)
     }
 
     gameStart(uname: string): void {
@@ -73,8 +139,6 @@ export default class Game {
             socket.emit(Cons.MSG.LOGIN, { code: -1, msg: '用户已存在！' });
             return
         }
-        console.log("login====")
-
         if (existingPlayer.password === password) {
             existingPlayer.socket = socket
             if (existingPlayer.roomNumber) {
@@ -113,17 +177,39 @@ export default class Game {
             socket.emit(Cons.MSG.SHOW_ROOMS, roomsInfo)
         }
     }
+    showPlayers(socket: Socket) {
+        const allPlayer = this.setAllUserInfo()
+        if (allPlayer) {
+            socket.emit(Cons.MSG.SHOW_PLAYERS, allPlayer)
+        }
+    }
+
+    showAllPlayer() {
+        const allPlayer = this.setAllUserInfo()
+        console.log("allPlayer:", allPlayer);
+        this.players.forEach((player: Player) => {
+            player.socket.emit(Cons.MSG.SHOW_PLAYERS, allPlayer)
+        })
+    }
+
+    setAllUserInfo() {
+        const playersVo: PlayerVo[] = []
+        this.players.forEach((p: Player) => {
+            const a: PlayerVo = ReflectType.convert(PlayerVo, p)
+            playersVo.push(a)
+        })
+        return playersVo
+    }
 
     /**
      * 告诉所有用户
      */
     showAllRooms() {
         const roomsInfo = this.setRoomsInfo()
-        if (roomsInfo) {
-            this.players.forEach((player: Player) => {
-                player.socket.emit(Cons.MSG.SHOW_ROOMS, roomsInfo)
-            })
-        }
+        this.players.forEach((player: Player) => {
+            player.socket.emit(Cons.MSG.SHOW_ROOMS, roomsInfo)
+        })
+        // this.showAllPlayer();
     }
 
     setRoomsInfo() {
@@ -137,23 +223,26 @@ export default class Game {
         return roomsInfo
     }
 
-    // playerOffline(socket: Socket) {
-    //     const players = Array.from(this.players)
-    //     const index = players.findIndex(([key, player]) => player.socket.id === socket.id)
-    //     if (index >= 0) {
-    //         const [uname, player]: [string, Player] = players[index]
-    //         const room: Room = this.rooms.get(player.roomNumber)
-    //         if (!room) {
-    //             return
-    //         }
-    //         if (room.status === Cons.STATUS.RUNNING) {
-    //             room.offlinePlayer(uname)
-    //         } else {
-    //             room.removePlayer(uname)
-    //         }
-    //         socket.emit(Cons.MSG.USER_LEAVE)
-    //     }
-    // }
+    playerOffline(socket: Socket) {
+        const players = Array.from(this.players)
+        const index = players.findIndex(([key, player]) => player.socket.id === socket.id)
+        if (index >= 0) {
+            const [uname, player]: [string, Player] = players[index]
+            const room: Room = this.rooms.get(player.roomNumber)
+            if (!room) {
+                return
+            }
+            room.homePlayers.forEach(player => {
+                player.socket.emit(Cons.MSG.MESSAGE, new Result().error(uname + "已逃走！！！！游戏结束"))
+            })
+
+            setTimeout(() => {
+                this.delete_room_force(uname)
+                const a = this.players.delete(uname)
+                console.log("处理掉用户:", uname, ':', a)
+            }, 2000)
+        }
+    }
 
     // removePlayer(socket: Socket) {
     //     const players = Array.from(this.players)

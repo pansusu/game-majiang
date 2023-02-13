@@ -7,6 +7,7 @@ import { useRouter } from "vue-router";
 import Cons from "../server/entity/constants";
 import Result from "../server/entity/result";
 import { useMessage } from "naive-ui";
+import Players from "@/components/Players.vue";
 
 const socket: any = inject("socket");
 const message = useMessage();
@@ -45,6 +46,13 @@ socket.on(Cons.MSG.JOIN_ROOM, (data: Result) => {
 	}
 });
 
+const deleteRoom = (roomNumber: string) => {
+	if (!uname && !roomNumber) {
+		return;
+	}
+	socket?.emit(Cons.MSG.DELETE_ROOM_BY_ROOM_NUM, { uname, roomNumber });
+};
+
 onMounted(() => {
 	console.log(uname);
 	if (!uname) {
@@ -60,6 +68,8 @@ onMounted(() => {
 		<div
 			class="my-3 py-2 px-4 bg-green-200 text-green-500 w-fit rounded-full font-bold"
 		>当前登录人：{{ uname }}</div>
+
+		<!-- <div class="flex"> -->
 		<div class="h-1/4 overflow-y-auto border px-4 py-3">
 			<div>
 				<div class="flex justify-between border-b pb-3">
@@ -76,11 +86,16 @@ onMounted(() => {
 					<div>{{ item.roomNumber }}</div>
 					<div>{{ item.players }}</div>
 					<div>{{ item.status }}</div>
-					<n-button @click="joinGame(item.roomNumber)">加入</n-button>
+					<n-space>
+						<n-button @click="joinGame(item.roomNumber)">加入</n-button>
+						<n-button @click="deleteRoom(item.roomNumber)">删除</n-button>
+					</n-space>
 				</div>
 			</div>
 			<div v-else class="text-center mt-3 text-gray-500">暂无房间</div>
 		</div>
+		<!-- <Players /> -->
+		<!-- </div> -->
 	</div>
 	<div class="w-full flex justify-center items-center my-5 fixed bottom-10">
 		<n-button round type="primary" style="width: 200px;" @click="newGame">创建房间</n-button>

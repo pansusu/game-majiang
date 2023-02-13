@@ -28,8 +28,8 @@ export default class Room {
     }
 
     addPlayer(player: Player): void {
-        this.homePlayers.push(player);
         player.roomNumber = this.roomNumber
+        this.homePlayers.push(player);
     }
 
     joinRoom(player: Player): void {
@@ -62,15 +62,12 @@ export default class Room {
      * 群发送房间数据到前端
      */
     sendRoomInfoToAllPlayers(): void {
-        console.log("start-sendRoomInfoToAllPlayers")
         const roomInfo = this.getSendRoomInfo()
         this.homePlayers.forEach(pl => {
             pl.socket.emit(Cons.MSG.ROOM_INFO, roomInfo)
             const pvo: PlayerVo = ReflectType.convert(PlayerVo, pl)
-            console.log("pov:", pvo.uname);
             pl.socket.emit(Cons.MSG.USER_INFO, pvo)
         })
-        console.log("end-sendRoomInfoToAllPlayers")
     }
 
     // 实时倒计时推送
@@ -118,6 +115,7 @@ export default class Room {
         player.addCard();
         this.setCurrentPlayer(player.uname)
         this.setState(player.uname, PLAYER_STATUS.Discard);
+
     }
 
     // 当前轮到谁出牌
@@ -200,6 +198,8 @@ export default class Room {
             this.sendRoomInfoToAllPlayers()
         }
     }
+
+
 
     /**
     * 重连

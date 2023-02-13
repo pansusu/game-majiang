@@ -32,21 +32,22 @@ export default class GameSocketService {
 
         socket.on('disconnect', () => {
             console.log(`player disconnected Socket Id:${socket.id}`)
-            // this.game?.playerOffline(socket)
+            this.game?.playerOffline(socket)
         })
 
         socket.on(Cons.MSG.LOGIN, (uname: string, password: string) => {
-            console.log(uname, password)
             this.game?.login(socket, uname, password,)
         })
 
         socket.on(Cons.MSG.IS_LOGIN, (uname: string) => {
-            console.log(uname)
             this.game?.isLoggedInByUserName(socket, uname)
         })
 
         socket.on(Cons.MSG.SHOW_ROOMS, () => {
             this.game?.showRooms(socket)
+        })
+        socket.on(Cons.MSG.SHOW_PLAYERS, () => {
+            this.game?.showPlayers(socket)
         })
 
         socket.on(Cons.MSG.CREATE_ROOM, (uname) => {
@@ -54,7 +55,6 @@ export default class GameSocketService {
         })
 
         socket.on(Cons.MSG.JOIN_ROOM, (join: any) => {
-            console.log(join)
             this.game?.joinRoom(socket, join.uname, join.roomNumber)
         })
 
@@ -63,8 +63,14 @@ export default class GameSocketService {
         })
 
         socket.on(Cons.MSG.GAME_START, (uname: string) => {
-            console.log(uname)
             this.game?.gameStart(uname)
+        })
+
+        socket.on(Cons.MSG.DELETE_ROOM, (uname: string) => {
+            this.game?.delete_room_force(uname)
+        })
+        socket.on(Cons.MSG.DELETE_ROOM_BY_ROOM_NUM, (roomData: any) => {
+            this.game?.delete_room_force_by_room(roomData)
         })
 
         socket.on('message', (msg: string) => {
@@ -73,7 +79,6 @@ export default class GameSocketService {
 
         // 出牌
         socket.on(Cons.MSG.MJ_DISCARD, ({ uname, mjs }: { uname: string, mjs: Mj[] }) => {
-            console.log(uname, mjs)
             if (mjs.length <= 0) {
                 return
             }

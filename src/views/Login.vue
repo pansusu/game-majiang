@@ -22,8 +22,8 @@ const login = () => {
 		return;
 	}
 
-	if (user.length > 10) {
-		message.warning("Name must not be more than 10 characters.");
+	if (user.length > 5) {
+		message.warning("Name must not be more than 5 characters.");
 		return;
 	}
 

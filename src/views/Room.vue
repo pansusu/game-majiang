@@ -159,6 +159,14 @@ const handleDiscard = (rd: string[]) => {
 	isClear_readyDiscard.value = false;
 	readyDiscard.value = rd;
 };
+
+const stopGame = () => {
+	if (roomMaster.value != uname) {
+		message.warning("只有房主才能终止游戏！");
+		return;
+	}
+	socket?.emit(Cons.MSG.DELETE_ROOM, uname);
+};
 </script>
 <template>
 	<div class="p-4">
@@ -240,6 +248,7 @@ const handleDiscard = (rd: string[]) => {
 				<n-space>
 					<n-button round size="large" v-if="!pan" type="primary" @click="handleGameStart">开始</n-button>
 					<n-button :disabled="!pan" round size="large" type="info" @click="sendDiscard">出牌</n-button>
+					<n-button v-if="roomMaster == uname" round size="large" @click="stopGame()">终止</n-button>
 				</n-space>
 			</div>
 		</div>

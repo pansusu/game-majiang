@@ -19,6 +19,17 @@ export async function setupRouter(app: App) {
             router.replace({ name: 'login', })
         }
     })
+
+    socket.on(Cons.MSG.GAME_START_IN_ROOM, (data) => {
+        console.log("in the room：", data);
+        router.replace({ path: '/game/room', })
+    })
+
+    socket.on(Cons.MSG.DELETE_ROOM, (data) => {
+        console.log("in the room：", data);
+        router.replace({ path: '/game/home', })
+    })
+
     router.beforeEach((to, from, next) => {
         console.log(to)
         if (to.name == '404') {

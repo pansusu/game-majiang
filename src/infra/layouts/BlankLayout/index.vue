@@ -10,6 +10,21 @@
 </template>
 
 <script setup lang="ts">
+import Cons from "@/server/entity/constants";
+import Result from "@/server/entity/result";
+import { useMessage } from "naive-ui";
+import { inject } from "vue";
+
+const socket: any = inject("socket");
+const message = useMessage();
+
+socket?.on(Cons.MSG.MESSAGE, (c: Result): void => {
+	if (c.code != 0) {
+		message.error(c.msg || "访问错误");
+	} else {
+		message.success(c.msg || "success");
+	}
+});
 </script>
 
 <style scoped></style>
