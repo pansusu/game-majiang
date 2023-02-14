@@ -185,7 +185,9 @@ const stopGame = () => {
 						<div class="flex justify-center">
 							<OtherPan :isDiscard="true" :mjs="top_player.remaining_mj" />
 						</div>
-						<div class="w-full text-center font-bold text-xl mb-4 text-white">{{ top_player?.status }}</div>
+						<div
+							class="w-full text-center font-bold text-xl mb-4 text-white"
+						>{{ top_player.uname }}{{ top_player?.status }}</div>
 					</div>
 				</div>
 
@@ -197,19 +199,23 @@ const stopGame = () => {
 					<div class="flex justify-center">
 						<OtherPan :isDiscard="true" :mjs="left_player.remaining_mj" />
 					</div>
-					<div class="w-full text-center font-bold text-xl mb-4 text-white">{{ left_player?.status }}</div>
+					<div
+						class="w-full text-center font-bold text-xl mb-4 text-white"
+					>{{ left_player.uname }}{{ left_player?.status }}</div>
 				</div>
 
 				<div v-if="right_player" class="w-[450px] h-6 right">
 					<div class="flex justify-center">
 						<OtherPan :isDiscard="true" :mjs="right_player.remaining_mj" />
 					</div>
-					<div class="w-full text-center font-bold text-xl mb-4 text-white">{{ right_player?.status }}</div>
+					<div
+						class="w-full text-center font-bold text-xl mb-4 text-white"
+					>{{ right_player.uname }}{{ right_player?.status }}</div>
 				</div>
 
 				<div class="bottom w-full">
 					<div class="flex flex-col items-center justify-center">
-						<div class="font-bold text-lg mb-4 text-white">{{ me?.status }}</div>
+						<div class="font-bold text-lg mb-4 text-white">{{ me?.uname }}{{ me?.status }}</div>
 						<div v-if="pan?.hadPeng" class="w-full mb-5">
 							<div class="flex flex-col items-center justify-center">
 								<MaJiangs
