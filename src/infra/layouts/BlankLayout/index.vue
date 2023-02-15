@@ -13,7 +13,7 @@
 import Cons from "@/server/entity/constants";
 import Result from "@/server/entity/result";
 import { useMessage } from "naive-ui";
-import { inject } from "vue";
+import { inject, onMounted } from "vue";
 
 const socket: any = inject("socket");
 const message = useMessage();

@@ -22,13 +22,12 @@ export default class Game {
 
     isInTheGameRoom(player: Player) {
         if (player.roomNumber) {
+            player.socket.emit(Cons.MSG.MESSAGE, new Result().error("您已在房间：" + player.roomNumber))
             player.socket.emit(Cons.MSG.GAME_START_IN_ROOM, player.roomNumber);
             return true
         }
         return false
     }
-
-
 
     createRoom(uname: string) {
         console.log("创建房间：", uname);
@@ -54,10 +53,17 @@ export default class Game {
             return
         }
         const room: Room = this.rooms.get(roomNumber)
+
         if (!room) {
             socket.emit(Cons.MSG.MESSAGE, new Result().error("房间不存在!"))
             return
         }
+
+        if (room.status == Cons.STATUS.RUNNING) {
+            socket.emit(Cons.MSG.MESSAGE, new Result().error("游戏已经开始...!"))
+            return
+        }
+
         room.joinRoom(player);
         this.showAllRooms()
     }
@@ -79,7 +85,7 @@ export default class Game {
         room.homePlayers.forEach(p => {
             const game_player = this.players.get(p.uname)
             if (game_player) {
-                game_player.roomNumber = ""
+                game_player.leaveRoom()
                 game_player.socket.emit(Cons.MSG.DELETE_ROOM)
             }
         })
@@ -269,6 +275,26 @@ export default class Game {
     isLoggedInByUserName(socket: Socket, uname: string) {
         if (!this.players.has(uname)) {
             socket.emit(Cons.MSG.NO_LOGIN, new Result().error("用户不存在!"))
+        }
+    }
+
+    keepOnline(socket: Socket, uname: string) {
+        const a = this.players.get(uname)
+        console.log("重新设置socket");
+
+        if (!a) {
+            socket.emit(Cons.MSG.NO_LOGIN, new Result().error("用户不存在!"))
+            return
+        }
+        if (a.socket.id == socket.id) {
+            console.log("socket无需重置...");
+            return
+        }
+        a.socket = socket
+        const room: Room = this.rooms.get(a.roomNumber)
+        const index = room?.homePlayers.findIndex(p => p.uname == uname) || -1
+        if (index >= 0) {
+            room.homePlayers[index].socket = socket
         }
     }
 

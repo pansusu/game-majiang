@@ -30,6 +30,11 @@ export default class Player {
         room.addPlayer(this)
     }
 
+    leaveRoom(): void {
+        this.roomNumber = ""
+        this.pan = null
+    }
+
     initPan(pan: Pan): void {
         this.pan = pan
     }

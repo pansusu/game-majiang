@@ -12,4 +12,5 @@ export default class RoomVo {
     playersAll: Array<OtherPlayer> = [];
     currentPlayer: string;
     currentMj: Mj[];
+    discardedMj: Mj[];
 }

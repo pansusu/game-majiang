@@ -33,7 +33,7 @@ const login = () => {
 };
 
 onMounted(() => {
-	// login();
+	login();
 });
 
 socket?.on(Cons.MSG.LOGIN, (data) => {

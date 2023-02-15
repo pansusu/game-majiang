@@ -32,7 +32,7 @@ export default class GameSocketService {
 
         socket.on('disconnect', () => {
             console.log(`player disconnected Socket Id:${socket.id}`)
-            this.game?.playerOffline(socket)
+            // this.game?.playerOffline(socket)
         })
 
         socket.on(Cons.MSG.LOGIN, (uname: string, password: string) => {
@@ -41,6 +41,10 @@ export default class GameSocketService {
 
         socket.on(Cons.MSG.IS_LOGIN, (uname: string) => {
             this.game?.isLoggedInByUserName(socket, uname)
+        })
+
+        socket.on(Cons.MSG.KEEP_ONLINE, (uname: string) => {
+            this.game?.keepOnline(socket, uname)
         })
 
         socket.on(Cons.MSG.SHOW_ROOMS, () => {

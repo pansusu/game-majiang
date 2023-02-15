@@ -12,6 +12,7 @@ export const router = createRouter({
 
 export async function setupRouter(app: App) {
     const socket: Socket = app.config.globalProperties.$socket
+
     socket.on(Cons.MSG.NO_LOGIN, (data) => {
         const { code } = data
         console.log("nologin:", data)
@@ -26,16 +27,29 @@ export async function setupRouter(app: App) {
     })
 
     socket.on(Cons.MSG.DELETE_ROOM, (data) => {
-        console.log("in the room：", data);
+        console.log("DELETE_ROOM :in the room：", data);
         router.replace({ path: '/game/home', })
     })
 
     router.beforeEach((to, from, next) => {
         console.log(to)
-        if (to.name == '404') {
-            // router.replace({ name: 'login', })
-            next({ name: 'login' })
+        const uname = sessionStorage.getItem("uname") || "";
+
+        if (uname) {
+            console.log("用户刷新：", uname);
+            socket.emit(Cons.MSG.KEEP_ONLINE, uname)
+        } else {
+            if (to.name != "login") {
+                next({ name: 'login' })
+                return
+            }
         }
+
+        if (to.name == '404') {
+            next({ name: 'login' })
+            return
+        }
+
         next()
     })
     app.use(router);

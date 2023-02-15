@@ -21,10 +21,14 @@ export default class Room {
     countDown: number = 0;
     currentPlayer: string;
     currentMj: Mj[];
+    discardedMj: Mj[] = [];
     timer: NodeJS.Timer
 
     constructor() {
         this.roomNumber = Math.floor(Math.random() * 10000).toString();
+        // for (let i = 0; i < 30; i++) {
+        //     this.discardedMj.push(new Mj());
+        // }
     }
 
     addPlayer(player: Player): void {
@@ -173,6 +177,8 @@ export default class Room {
         const roomPlayer = this.homePlayers[index]
 
         roomPlayer.discard(discardMjs)
+
+        this.discardedMj = this.discardedMj.concat(discardMjs)
         this.setCurrentMj(discardMjs)
         this.sendRoomInfoToAllPlayers()
 
@@ -198,8 +204,6 @@ export default class Room {
             this.sendRoomInfoToAllPlayers()
         }
     }
-
-
 
     /**
     * 重连

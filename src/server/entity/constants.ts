@@ -23,6 +23,7 @@ const Cons = Object.freeze({
         GAME_START_IN_ROOM: '19',
         DELETE_ROOM: '20',
         DELETE_ROOM_BY_ROOM_NUM: '21',
+        KEEP_ONLINE: '22',
     },
     ROLE: {
         CIVILIAN: '平民',

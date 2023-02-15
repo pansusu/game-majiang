@@ -15,6 +15,7 @@ import OtherPlayer from "@/server/vo/otherPlayer";
 import player from "@/server/entity/player";
 import PlayerVo from "@/server/vo/playerVo";
 import MaJiangs from "@/components/MaJiangs.vue";
+import MaJiangDiscard from "@/components/MaJiangDiscard.vue";
 import MyPan from "@/components/MyPan.vue";
 import OtherPan from "@/components/OtherPan.vue";
 import { HappyOutline } from "@vicons/ionicons5";
@@ -43,12 +44,6 @@ const top_player = ref<OtherPlayer>();
 
 socket?.emit(Cons.MSG.ROOM_INFO, uname, password);
 
-socket?.on(Cons.MSG.NO_LOGIN, (data: Result) => {
-	const { code, msg } = data;
-	if (code !== 0) {
-		router.push("/");
-	}
-});
 // 获取房间信息
 socket?.on(Cons.MSG.ROOM_INFO, (data: RoomVo) => {
 	room.value = data;
@@ -169,32 +164,50 @@ const stopGame = () => {
 	}
 	socket?.emit(Cons.MSG.DELETE_ROOM, uname);
 };
+
+// 刷新返回登录页面问题
+//用户重新返回了登录页面 要把用用户踢出，可以把用户列表打出来
 </script>
 <template>
-	<div class="p-4">
-		<div class="flex justify-between text-lg mb-10">
+	<div class="p-4 h-full w-full">
+		<div class="flex justify-between text-lg mb-7">
 			<div>房间号：{{ room?.roomNumber }}</div>
 			<div class="font-bold">{{ uname }}【{{ uname == roomMaster?'房主':"玩家"}}】</div>
 			<div class="font-bold">剩余牌：{{ myMj?.length }}</div>
 		</div>
 
 		<div v-show="pan" class="flex items-center justify-center mb-6 relative">
-			<div class="bg-green-700 min-w-[1300px] tx-clip h-[500px]"></div>
+			<div class="min-w-[1300px] tx-clip h-[600px] bg-gray-700"></div>
 
-			<div class="w-[1600px] absolute h-[500px]">
+			<div class="min-w-[1300px] absolute h-[600px]">
 				<div v-if="top_player" class="top w-full flex justify-center">
 					<div class="w-[400px] h-6">
+						<div
+							class="w-full text-center font-bold text-xl mb-2 text-white"
+						>{{ top_player.uname }} {{ top_player?.status }}</div>
 						<div class="flex justify-center">
 							<OtherPan :isDiscard="true" :mjs="top_player.remaining_mj" />
 						</div>
-						<div
-							class="w-full text-center font-bold text-xl mb-4 text-white"
-						>{{ top_player.uname }}{{ top_player?.status }}</div>
 					</div>
 				</div>
 
-				<div v-if="room?.currentMj" class="w-[400px] medium">
-					<MaJiangs :isDiscard="true" :mjs="room.currentMj" />
+				<div v-if="room?.discardedMj" class="w-full absolute top-20 flex justify-center items-center">
+					<div class="w-[700px]">
+						<div class="flex justify-center items-center">
+							<MaJiangDiscard :mj-style="{fontSize:'12px',padding:'6px 13px'}" :mjs="room.discardedMj" />
+						</div>
+					</div>
+				</div>
+
+				<div
+					v-if="room?.currentMj"
+					class="w-full absolute top-[200px] flex justify-center items-center"
+				>
+					<div class="w-[700px]">
+						<div class="flex justify-center items-center">
+							<MaJiangs :isDiscard="true" :mjs="room.currentMj" />
+						</div>
+					</div>
 				</div>
 
 				<div v-if="left_player" class="w-[450px] h-6 left">
@@ -203,7 +216,7 @@ const stopGame = () => {
 					</div>
 					<div
 						class="w-full text-center font-bold text-xl mb-4 text-white"
-					>{{ left_player.uname }}{{ left_player?.status }}</div>
+					>{{ left_player.uname }} {{ left_player?.status }}</div>
 				</div>
 
 				<div v-if="right_player" class="w-[450px] h-6 right">
@@ -212,12 +225,12 @@ const stopGame = () => {
 					</div>
 					<div
 						class="w-full text-center font-bold text-xl mb-4 text-white"
-					>{{ right_player.uname }}{{ right_player?.status }}</div>
+					>{{ right_player.uname }} {{ right_player?.status }}</div>
 				</div>
 
 				<div class="bottom w-full">
 					<div class="flex flex-col items-center justify-center">
-						<div class="font-bold text-lg mb-4 text-white">{{ me?.uname }}{{ me?.status }}</div>
+						<div class="font-bold text-lg mb-4 text-white">{{ me?.uname }} {{ me?.status }}</div>
 						<div v-if="pan?.hadPeng" class="w-full mb-5">
 							<div class="flex flex-col items-center justify-center">
 								<MaJiangs
@@ -249,7 +262,7 @@ const stopGame = () => {
 			</n-space>
 		</div>
 
-		<!-- 暗杠 ，胡牌， 发牌, 游戏结束，删除房间 -->
+		<!-- 暗杠 ，胡牌， 发牌, 游戏结束 -->
 		<div class="flex items-center justify-center w-full">
 			<div class="flex flex-col justify-center items-center">
 				<div v-if="pan" class="text-orange-500 text-2xl font-bold mb-5">出牌倒计时： {{ count }}</div>
@@ -292,25 +305,22 @@ const stopGame = () => {
 	@apply absolute bottom-5;
 }
 
-.medium {
-	@apply absolute top-1/4;
-	left: calc(50% - 35px);
-}
-
 .top {
-	@apply absolute top-3;
+	@apply absolute top-0;
 }
 
 .left {
-	transform: rotateZ(-63deg) translateY(220px) translateX(-150px);
+	transform: rotateZ(-67deg);
 	position: absolute;
-	left: 0;
+	left: -60px;
+	top: calc(50% - 20px);
 }
 
 .right {
-	transform: rotateZ(63deg) translateY(220px) translateX(150px);
+	transform: rotateZ(67deg);
 	position: absolute;
-	right: 0;
+	right: -60px;
+	top: calc(50% - 20px);
 }
 
 .back {
