@@ -1,9 +1,5 @@
 import { Socket } from "socket.io";
 import Room from "./room.js";
-import Game from "./game.js";
-import Role from "./role.js";
-import Cons from "./constants.js";
-import Result from "./result.js";
 import PlayerVo from "../vo/playerVo.js";
 import { ReflectType } from "../common.js"
 import Pan from "./pan.js";
@@ -40,16 +36,16 @@ export default class Player {
     }
 
     addCard() {
-        this.pan.addCard()
+        this.pan?.addCard()
     }
 
     discard(mjs: Mj[]) {
-        this.pan.disCard(mjs)
+        this.pan?.disCard(mjs)
     }
 
     peng(mj: Mj) {
         for (let i = 0; i <= 2; i++) {
-            this.pan.hadPeng.push(mj)
+            this.pan?.hadPeng?.push(mj)
         }
     }
     gang(mj: Mj) {

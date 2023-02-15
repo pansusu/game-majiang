@@ -1,26 +1,21 @@
 
 <script setup lang="ts">
-import Player from "@/server/entity/player";
 import RoomVo from "@/server/vo/roomVo";
 import { inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import type { Socket } from "socket.io-client";
 import Cons from "@/server/entity/constants";
-import Result from "@/server/entity/result";
 import Pan from "@/server/entity/pan";
 import Mj from "@/server/entity/mj";
 import { sort_pan } from "@/infra/utils/panUtils";
 import { useMessage } from "naive-ui";
 import OtherPlayer from "@/server/vo/otherPlayer";
-import player from "@/server/entity/player";
 import PlayerVo from "@/server/vo/playerVo";
 import MaJiangs from "@/components/MaJiangs.vue";
 import MaJiangDiscard from "@/components/MaJiangDiscard.vue";
 import MyPan from "@/components/MyPan.vue";
 import OtherPan from "@/components/OtherPan.vue";
 import { HappyOutline } from "@vicons/ionicons5";
-
-const colors = ["text-red-500", "text-blue-500", "text-green-500"];
 
 // --watch './**/*.ts'
 const room = ref<RoomVo>();
@@ -56,6 +51,7 @@ socket?.on(Cons.MSG.ROOM_INFO, (data: RoomVo) => {
 	top_player.value = players[(myPosition + 2) % 4];
 	left_player.value = players[(myPosition + 3) % 4];
 });
+
 // 获取当前用户信息
 socket?.on(Cons.MSG.USER_INFO, (data: PlayerVo) => {
 	console.log("userInfo:", data);
@@ -63,6 +59,7 @@ socket?.on(Cons.MSG.USER_INFO, (data: PlayerVo) => {
 	pan.value = data.pan;
 	myMj.value = sort_pan(data.pan?.myMj);
 });
+
 // 发牌倒计时
 socket?.on(Cons.MSG.ROOM_INFO_COUNT_DOWN, (c: number) => {
 	count.value = c;
