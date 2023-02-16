@@ -14,8 +14,9 @@ import PlayerVo from "@/server/vo/playerVo";
 import MaJiangs from "@/components/MaJiangs.vue";
 import MaJiangDiscard from "@/components/MaJiangDiscard.vue";
 import MyPan from "@/components/MyPan.vue";
-import OtherPan from "@/components/OtherPan.vue";
-import { HappyOutline } from "@vicons/ionicons5";
+import JoinRooMPlayer from "@/components/JoinRooMPlayer.vue";
+import PlayersPan from "@/components/PlayersPan.vue";
+import CurrentDiscarded from "@/components/CurrentDiscarded.vue";
 
 // --watch './**/*.ts'
 const room = ref<RoomVo>();
@@ -179,61 +180,37 @@ const stopGame = () => {
 			<div class="font-bold">剩余牌：{{ myMj?.length }}</div>
 		</div>
 
+		<!-- 桌盘 -->
 		<div v-show="pan" class="flex items-center justify-center mb-6 relative">
 			<div class="min-w-[1300px] tx-clip h-[600px] bg-gray-700"></div>
 
 			<div class="min-w-[1300px] absolute h-[600px]">
-				<div v-if="top_player" class="top w-full flex justify-center">
-					<div class="w-[400px] h-6">
-						<div
-							class="w-full text-center font-bold text-xl mb-2 text-white"
-						>{{ top_player.uname }} {{ top_player?.status }}</div>
-						<div class="flex justify-center">
-							<OtherPan :isDiscard="true" :mjs="top_player.remaining_mj" />
-						</div>
-					</div>
-				</div>
+				<!-- 出的牌 -->
+				<MaJiangDiscard
+					v-if="room?.discardedMj "
+					:mj-style="{fontSize:'12px',padding:'6px 13px'}"
+					:mjs="room.discardedMj"
+				/>
 
-				<div v-if="room?.discardedMj" class="w-full absolute top-20 flex justify-center items-center">
-					<div class="w-[700px]">
-						<div class="flex justify-center items-center">
-							<MaJiangDiscard :mj-style="{fontSize:'12px',padding:'6px 13px'}" :mjs="room.discardedMj" />
-						</div>
-					</div>
-				</div>
+				<!-- 打的牌 -->
+				<CurrentDiscarded v-if="room?.currentMj" :currentMj="room.currentMj" />
 
-				<div
-					v-if="room?.currentMj"
-					class="w-full absolute top-[200px] flex justify-center items-center"
-				>
-					<div class="w-[700px]">
-						<div class="flex justify-center items-center">
-							<MaJiangs :isDiscard="true" :mjs="room.currentMj" />
-						</div>
-					</div>
-				</div>
+				<!-- 北 -->
+				<PlayersPan v-if="top_player" :other-player="top_player" direction="top" />
 
-				<div v-if="left_player" class="w-[450px] h-6 left">
-					<div class="flex justify-center">
-						<OtherPan :isDiscard="true" :mjs="left_player.remaining_mj" />
-					</div>
-					<div
-						class="w-full text-center font-bold text-xl mb-4 text-white"
-					>{{ left_player.uname }} {{ left_player?.status }}</div>
-				</div>
+				<!-- 西 -->
+				<PlayersPan v-if="left_player" :other-player="left_player" direction="left" />
 
-				<div v-if="right_player" class="w-[450px] h-6 right">
-					<div class="flex justify-center">
-						<OtherPan :isDiscard="true" :mjs="right_player.remaining_mj" />
-					</div>
-					<div
-						class="w-full text-center font-bold text-xl mb-4 text-white"
-					>{{ right_player.uname }} {{ right_player?.status }}</div>
-				</div>
+				<!-- 东 -->
+				<PlayersPan v-if="right_player" :other-player="right_player" direction="right" />
 
-				<div class="bottom w-full">
+				<!-- 南 -->
+				<div class="absolute bottom-5 w-full">
 					<div class="flex flex-col items-center justify-center">
-						<div class="font-bold text-lg mb-4 text-white">{{ me?.uname }} {{ me?.status }}</div>
+						<div class="font-bold text-lg mb-2 text-white">
+							{{ me?.uname }}
+							<span class="text-orange-400" v-if="me?.status">【{{ me?.status }}】</span>
+						</div>
 						<div v-if="pan?.hadPeng" class="w-full mb-5">
 							<div class="flex flex-col items-center justify-center">
 								<MaJiangs
@@ -248,22 +225,10 @@ const stopGame = () => {
 				</div>
 			</div>
 		</div>
+		<!-- 桌盘 end -->
 
-		<div v-show="!pan" class="flex items-center justify-center bg-gray-50 shadow py-7 mb-6">
-			<n-space>
-				<div class="text-center" v-for="p,index in room?.playersAll">
-					<div class="text-blue-500">{{ p.uname == roomMaster?'房主':"玩家"+index }}</div>
-					<div
-						class="w-16 h-16 rounded-full bg-green-300 flex flex-col items-center justify-center shadow-md"
-					>
-						<n-icon color="#0e7a0d" size="40">
-							<HappyOutline />
-						</n-icon>
-					</div>
-					<div class="text-green-600 font-bold text-lg">{{ p.uname }}</div>
-				</div>
-			</n-space>
-		</div>
+		<!-- 进入游戏的好友 -->
+		<JoinRooMPlayer v-show="!pan" :roomMaster="roomMaster" :players="room?.playersAll" />
 
 		<!-- 暗杠 ，胡牌， 发牌, 游戏结束 -->
 		<div class="flex items-center justify-center w-full">
@@ -280,53 +245,7 @@ const stopGame = () => {
 </template>
 
 <style scoped>
-.cube {
-	transform-style: preserve-3d;
-	transform: rotateX(-20deg) rotateY(10deg);
-}
-
 .tx-clip {
 	clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
-}
-
-.side {
-	position: absolute;
-	height: 100px;
-	width: 1200px;
-	background: rgba(255, 99, 71, 1);
-	border: 1px solid rgba(0, 0, 0, 0.5);
-	color: white;
-	text-align: center;
-	line-height: 4em;
-}
-
-.front {
-	transform: translateZ(1em);
-}
-
-.bottom {
-	@apply absolute bottom-5;
-}
-
-.top {
-	@apply absolute top-0;
-}
-
-.left {
-	transform: rotateZ(-67deg);
-	position: absolute;
-	left: -60px;
-	top: calc(50% - 20px);
-}
-
-.right {
-	transform: rotateZ(67deg);
-	position: absolute;
-	right: -60px;
-	top: calc(50% - 20px);
-}
-
-.back {
-	transform: translateZ(-1em);
 }
 </style>

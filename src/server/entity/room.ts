@@ -215,7 +215,7 @@ export default class Room {
         if (index !== -1) {
             player.offline = false
             this.homePlayers[index] = player
-            player.socket.emit(Cons.MSG.RECONNECT, { code: 0, msg: 'success' });
+            player.socket.emit(Cons.MSG.RECONNECT, { code: 0, msg: player.uname + "重连成功" });
             this.sendRoomInfoToAllPlayers()
         } else {
             player.socket.emit(Cons.MSG.RECONNECT, { code: -1, msg: '重连失败！' });

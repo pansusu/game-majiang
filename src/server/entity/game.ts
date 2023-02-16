@@ -264,14 +264,14 @@ export default class Game {
                 return
             }
             room.homePlayers.forEach(player => {
-                player.socket.emit(Cons.MSG.MESSAGE, new Result().error(uname + "已逃走！！！！游戏结束"))
+                player.socket.emit(Cons.MSG.MESSAGE, new Result().error(uname + "已逃走"))
             })
 
-            setTimeout(() => {
-                this.delete_room_force(uname)
-                const a = this.players.delete(uname)
-                console.log("处理掉用户:", uname, ':', a)
-            }, 2000)
+            // setTimeout(() => {
+            //     this.delete_room_force(uname)
+            //     const a = this.players.delete(uname)
+            //     console.log("处理掉用户:", uname, ':', a)
+            // }, 2000)
         }
     }
 

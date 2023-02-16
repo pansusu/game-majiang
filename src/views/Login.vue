@@ -49,7 +49,8 @@ socket?.on(Cons.MSG.LOGIN, (data) => {
 socket?.on(Cons.MSG.RECONNECT, (data) => {
 	const { code, msg } = data;
 	if (code == 0) {
-		router.push("/game/game-room");
+		message.success(msg);
+		router.push("/game/room");
 	} else {
 		alert(msg);
 	}

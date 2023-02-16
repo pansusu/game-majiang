@@ -16,10 +16,16 @@ const colors = ["text-red-500", "text-blue-500", "text-green-500"];
 </script>
 
 <template>
-	<div class="flex justify-center flex-wrap">
-		<div v-for="mj in mjs" :class="`mj ${colors[mj.type]} ${mjStyle} isPeng`" :style="style">
-			<div>{{ mj.num }}</div>
-			<div>{{ mj.typeName }}</div>
+	<div class="w-full absolute top-20 flex justify-center items-center">
+		<div class="w-[700px]">
+			<div class="flex justify-center items-center">
+				<div class="flex justify-center flex-wrap">
+					<div v-for="mj in mjs" :class="`mj ${colors[mj.type]} ${mjStyle} isPeng`" :style="style">
+						<div>{{ mj.num }}</div>
+						<div>{{ mj.typeName }}</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
