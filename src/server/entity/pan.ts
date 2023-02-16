@@ -1,7 +1,7 @@
 import Mj from "./mj.js";
 
 export default class Pan {
-    isVin: boolean;
+    isVin: boolean | undefined;
     myMj: Mj[] = [];
     hadPeng: Mj[] = []
 

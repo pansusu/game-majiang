@@ -9,10 +9,12 @@ const meta = document.createElement('meta')
 meta.name = 'naive-ui-style'
 document.head.appendChild(meta)
 
+const url = import.meta.env.VITE_URL
+
 async function setupApp() {
     const app = createApp(App);
     app.use(SocketIO, {
-        connection: 'http://101.42.39.244',
+        connection: url,
         // connection: 'http://localhost:5173',
     });
 

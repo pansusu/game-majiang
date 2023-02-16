@@ -3,7 +3,6 @@ import Player from "./player.js";
 import Room from './room.js'
 import RoomVo from "../vo/roomVo.js";
 import Cons from "./constants.js";
-import Word from "./word.js";
 import Result from "./result.js";
 import { ReflectType } from "../common.js"
 import Mj from "./mj.js";
@@ -14,7 +13,6 @@ export default class Game {
 
     players: Map<string, Player> = new Map<string, Player>();
     rooms: Map<string, Room> = new Map<string, Room>();
-    words: Word;
 
     constructor() {
         // this.words = new Word();
@@ -31,16 +29,20 @@ export default class Game {
 
     createRoom(uname: string) {
         console.log("创建房间：", uname);
-        const player: Player = this.players.get(uname)
+        const player = this.players.get(uname)
+        if (!player) {
+            console.log("createRoom 用户不存在")
+            return
+        }
         if (this.isInTheGameRoom(player)) {
             return
         }
-
         const room = new Room()
         room.addPlayer(player);
         this.rooms.set(room.roomNumber, room);
         player.socket.emit(Cons.MSG.CREATE_ROOM, { code: 0, msg: 'success' });
         this.showAllRooms()
+
     }
 
     joinRoom(socket: Socket, uname: string, roomNumber: string) {
@@ -49,10 +51,14 @@ export default class Game {
             return
         }
         const player = this.players.get(uname)
+        if (!player) {
+            console.log("joinRoom 用户不存在")
+            return
+        }
         if (this.isInTheGameRoom(player)) {
             return
         }
-        const room: Room = this.rooms.get(roomNumber)
+        const room = this.rooms.get(roomNumber)
 
         if (!room) {
             socket.emit(Cons.MSG.MESSAGE, new Result().error("房间不存在!"))
@@ -73,9 +79,13 @@ export default class Game {
             return
         }
         const player = this.players.get(uname)
+        if (!player) {
+            console.log("delete_room_force 用户不存在")
+            return
+        }
         const roomNumber = player.roomNumber
-        const room: Room = this.rooms.get(roomNumber)
-        this.delete_room(player, room)
+        const room = this.rooms.get(roomNumber)
+        room && this.delete_room(player, room)
     }
 
     delete_room(player: Player, room: Room) {
@@ -96,17 +106,25 @@ export default class Game {
         this.showAllRooms()
     }
 
-    delete_room_force_by_room({ uname, roomNumber }) {
+    delete_room_force_by_room({ uname, roomNumber }: { uname: string, roomNumber: string }) {
         console.log("删除房间：", uname, ':', roomNumber);
         if (!uname || !roomNumber) {
             return
         }
         const player = this.players.get(uname)
+        if (!player) {
+            console.log("delete_room_force_by_room 用户不存在")
+            return
+        }
         if (roomNumber !== player.roomNumber) {
             player.socket.emit(Cons.MSG.MESSAGE, new Result().error("只有房主能删除!"))
             return
         }
-        const room: Room = this.rooms.get(roomNumber)
+        const room = this.rooms.get(roomNumber)
+        if (!room) {
+            player.socket.emit(Cons.MSG.MESSAGE, new Result().error("房间不存在!"))
+            return
+        }
         const room_master = room.homePlayers[0]
         if (uname !== room_master.uname) {
             player.socket.emit(Cons.MSG.MESSAGE, new Result().error("只有房主能删除!"))
@@ -118,13 +136,15 @@ export default class Game {
 
     gameStart(uname: string): void {
         const player = this.players.get(uname)
-        const room: Room = this.rooms.get(player.roomNumber)
-        room.setCurrentPlayer(uname)
-        room.start(player)
+        if (!player) {
+            console.log("gameStart 用户不存在")
+            return
+        }
+        this.rooms.get(player.roomNumber)?.setCurrentPlayer(uname)?.start(player)
     }
     gameStartByRoom(roomNumber: string): void {
-        const room: Room = this.rooms.get(roomNumber)
-        room.start()
+        const room = this.rooms.get(roomNumber)
+        room && room.start()
     }
 
     login(socket: Socket, uname: string, password: string): void {
@@ -141,36 +161,41 @@ export default class Game {
             return
         }
 
+        // 重新进入房间
         if (existingPlayer.password !== password) {
             socket.emit(Cons.MSG.LOGIN, { code: -1, msg: '用户已存在！' });
             return
         }
-        if (existingPlayer.password === password) {
-            existingPlayer.socket = socket
-            if (existingPlayer.roomNumber) {
-                const room: Room = this.rooms.get(existingPlayer.roomNumber)
-                room?.reconnect(existingPlayer)
-            } else {
-                socket.emit(Cons.MSG.LOGIN, { code: 0, msg: 'success' });
+
+        existingPlayer.socket = socket
+        if (existingPlayer.roomNumber) {
+            const room = this.rooms.get(existingPlayer.roomNumber)
+            if (!room) {
+                existingPlayer.roomNumber = ""
+                return
             }
+            room?.reconnect(existingPlayer)
+        } else {
+            socket.emit(Cons.MSG.LOGIN, { code: 0, msg: 'success' });
         }
     }
 
     loadCurrentRoom(socket: Socket, uname: string, password: string): void {
-        const player: Player = this.players.get(uname)
-        if (!this.isLoggedIn(socket, player, password)) {
-            return
-        }
+        const player = this.players.get(uname)
+        if (player) {
+            if (!this.isLoggedIn(socket, player, password)) {
+                return
+            }
 
-        const room: Room = this.rooms.get(player.roomNumber)
-        if (!room) {
-            player.socket.emit(Cons.MSG.MESSAGE, new Result().error("用户不存在!"))
-            return
+            const room = this.rooms.get(player.roomNumber)
+            if (!room) {
+                player.socket.emit(Cons.MSG.MESSAGE, new Result().error("房间不存在!"))
+                return
+            }
+            player.offline = false
+            // room.sendRoomByPlayer(player)
+            room.sendRoomInfoToAllPlayers()
         }
-        player.offline = false
-        // room.sendRoomByPlayer(player)
-        room.sendRoomInfoToAllPlayers()
-
     }
 
     /**
@@ -234,7 +259,7 @@ export default class Game {
         const index = players.findIndex(([key, player]) => player.socket.id === socket.id)
         if (index >= 0) {
             const [uname, player]: [string, Player] = players[index]
-            const room: Room = this.rooms.get(player.roomNumber)
+            const room = this.rooms?.get(player.roomNumber)
             if (!room) {
                 return
             }
@@ -291,19 +316,22 @@ export default class Game {
             return
         }
         a.socket = socket
-        const room: Room = this.rooms.get(a.roomNumber)
-        const index = room?.homePlayers.findIndex(p => p.uname == uname) || -1
-        if (index >= 0) {
-            room.homePlayers[index].socket = socket
+        const room = this.rooms.get(a.roomNumber)
+        if (room) {
+            const index = room?.homePlayers.findIndex(p => p.uname == uname) || -1
+            if (index >= 0) {
+                room.homePlayers[index].socket = socket
+            }
         }
+
     }
 
     // 出牌操作
     player_discard_mj(uname: string, discardMjs: Mj[]) {
-        const player: Player = this.players.get(uname)
-        const room: Room = this.rooms.get(player.roomNumber)
-
-        room.deal_discard(uname, discardMjs)
+        const player = this.players.get(uname)
+        if (player?.roomNumber) {
+            this.rooms.get(player?.roomNumber)?.deal_discard(uname, discardMjs)
+        }
     }
 }
 // TODO:

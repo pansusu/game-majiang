@@ -19,10 +19,10 @@ export default class Room {
     roomIsAlive: boolean = true;
     status: string = Cons.STATUS.READY;
     countDown: number = 0;
-    currentPlayer: string;
-    currentMj: Mj[];
+    currentPlayer: string = "";
+    currentMj: Mj[] = [];
     discardedMj: Mj[] = [];
-    timer: NodeJS.Timer
+    timer: NodeJS.Timer | null = null;
 
     constructor() {
         this.roomNumber = Math.floor(Math.random() * 10000).toString();
@@ -97,7 +97,7 @@ export default class Room {
     }
 
     clearTimeCountDown() {
-        clearInterval(this.timer)
+        this.timer && clearInterval(this.timer)
         this.timer = null
         this.countDown = 0
         this.sendCountDownToAllPlayers()
@@ -125,6 +125,7 @@ export default class Room {
     // 当前轮到谁出牌
     setCurrentPlayer(player: string) {
         this.currentPlayer = player
+        return this
     }
     // 当前轮到谁出牌
     setCurrentMj(mj: Mj[]) {
@@ -153,12 +154,12 @@ export default class Room {
             console.log("some players are not already！")
         }
         this.status = Cons.STATUS.RUNNING
-        // shuffle(this.roles) //角色打乱
+        // shuffle(【】) //洗牌
         this.homePlayers.forEach(p => {
             p.initPan(new Pan());
         })
         // 给当前人发牌
-        this.distribute_action(player)
+        player && this.distribute_action(player)
         this.sendRoomInfoToAllPlayers();
     }
 

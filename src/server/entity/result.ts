@@ -1,7 +1,7 @@
 export default class Result {
 
-    code: number;
-    msg: string;
+    code: number | undefined;
+    msg: string | undefined;
 
     isSuccess() {
         return this.code === 0

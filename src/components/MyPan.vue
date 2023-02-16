@@ -8,11 +8,11 @@ interface Props {
 	clear: boolean;
 }
 const props = defineProps<Props>();
-const readyDiscard = ref<string[]>([]);
+const readyDiscard = ref<number[]>([]);
 const colors = ["text-red-500", "text-blue-500", "text-green-500"];
 const emit = defineEmits(["handleDiscard"]);
 
-const handleDiscard = (index: string) => {
+const handleDiscard = (index: number) => {
 	if (readyDiscard.value.includes(index)) {
 		readyDiscard.value = readyDiscard.value.filter((item) => item != index);
 		return;
@@ -35,8 +35,8 @@ watch(
 <template>
 	<div class="flex justify-center w-fit">
 		<div
-			@click="handleDiscard(String(index))"
-			:class="`group mj ${colors[item.type]} ${readyDiscard.includes(String(index)) ? '-translate-y-6' : ''}`"
+			@click="handleDiscard(index)"
+			:class="`group mj ${colors[item.type]} ${readyDiscard.includes(index) ? '-translate-y-6' : ''}`"
 			v-for="item, index in mjs"
 		>
 			<div>{{ item.num }}</div>

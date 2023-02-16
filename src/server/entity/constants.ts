@@ -25,11 +25,6 @@ const Cons = Object.freeze({
         DELETE_ROOM_BY_ROOM_NUM: '21',
         KEEP_ONLINE: '22',
     },
-    ROLE: {
-        CIVILIAN: '平民',
-        UNDERCOVER: '卧底',
-        BLANK: '白板'
-    },
     STATUS: {
         READY: '0',
         RUNNING: '1',

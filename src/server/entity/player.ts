@@ -9,12 +9,11 @@ import Mj from "./mj.js";
 export default class Player {
     uname: string
     password: string
-    isAlive: boolean
     offline: boolean = false
-    roomNumber: string
+    roomNumber: string = ""
     socket: Socket
-    pan: Pan = null
-    status: string  //碰 杠 胡
+    pan: Pan | null = null;
+    status: string = ""  //碰 杠 胡
 
     constructor(uname: string, password: string, socket: Socket) {
         this.uname = uname

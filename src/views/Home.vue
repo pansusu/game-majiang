@@ -7,7 +7,6 @@ import { useRouter } from "vue-router";
 import Cons from "../server/entity/constants";
 import Result from "../server/entity/result";
 import { useMessage } from "naive-ui";
-import Players from "@/components/Players.vue";
 
 const socket: any = inject("socket");
 const message = useMessage();

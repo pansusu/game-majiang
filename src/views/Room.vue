@@ -20,7 +20,7 @@ import { HappyOutline } from "@vicons/ionicons5";
 // --watch './**/*.ts'
 const room = ref<RoomVo>();
 const me = ref<PlayerVo>();
-const pan = ref<Pan>();
+const pan = ref<Pan | null>();
 const myMj = ref<Mj[]>();
 const router = useRouter();
 const message = useMessage();
@@ -29,7 +29,7 @@ const roomMaster = ref("");
 const socket: Socket | undefined = inject("socket");
 const uname = sessionStorage.getItem("uname") || "";
 const password = sessionStorage.getItem("password") || "";
-const readyDiscard = ref<string[]>([]);
+const readyDiscard = ref<number[]>([]);
 const isClear_readyDiscard = ref(false);
 const count = ref(0);
 
@@ -56,8 +56,8 @@ socket?.on(Cons.MSG.ROOM_INFO, (data: RoomVo) => {
 socket?.on(Cons.MSG.USER_INFO, (data: PlayerVo) => {
 	console.log("userInfo:", data);
 	me.value = data;
-	pan.value = data.pan;
-	myMj.value = sort_pan(data.pan?.myMj);
+	pan.value = data?.pan || null;
+	myMj.value = sort_pan(data?.pan?.myMj);
 });
 
 // 发牌倒计时
@@ -69,6 +69,9 @@ socket?.on(Cons.MSG.ROOM_INFO_COUNT_DOWN, (c: number) => {
  * 启动游戏
  */
 const handleGameStart = () => {
+	if (!room.value) {
+		return;
+	}
 	if (room.value.playersAll.length < 2) {
 		message.warning("至少要两个人才能开始游戏！");
 		return;
@@ -88,13 +91,20 @@ const sendDiscard = () => {
 		handleClearReadyDiscard();
 		return;
 	}
+	if (!myMj.value) {
+		return;
+	}
 
-	const mjs = readyDiscard.value.map((item) => {
-		return myMj.value[item] as Mj;
-	});
+	const mjs = readyDiscard.value
+		.map((item) => {
+			return myMj?.value ? ([item] as unknown as Mj) : null;
+		})
+		.filter((i) => i != null);
+
+	// 打了两只麻将，但是两张不一样
 	if (
 		mjs.length >= 2 &&
-		!mjs.every((item, i, arr) => item.name == arr[0].name)
+		!mjs.every((item, i, arr) => item?.name == arr[0]?.name)
 	) {
 		message.error("没有这个打法");
 		return;
@@ -115,7 +125,7 @@ const canDiscard = (): boolean => {
 	}
 
 	// 是否轮到自己
-	if (room.value.currentPlayer == uname) {
+	if (room.value?.currentPlayer == uname) {
 		if (readyDiscard.value.length > 1) {
 			message.warning("没有这种打法!");
 			return false;
@@ -139,17 +149,17 @@ const canDiscard = (): boolean => {
 const isPengAndGang = (): boolean => {
 	// 其他人只打了一张牌
 	if (room.value?.currentMj?.length == 1) {
-		const len = myMj.value.filter(
-			(item) => item.name == room.value.currentMj[0].name
-		).length;
-		console.log("len: " + len);
+		const len =
+			myMj.value?.filter(
+				(item) => item.name == room.value?.currentMj[0].name
+			).length || 0;
 		return len >= 2;
 	} else {
 		return false;
 	}
 };
 
-const handleDiscard = (rd: string[]) => {
+const handleDiscard = (rd: number[]) => {
 	isClear_readyDiscard.value = false;
 	readyDiscard.value = rd;
 };

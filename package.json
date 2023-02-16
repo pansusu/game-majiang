@@ -13,7 +13,7 @@
     "@": "/src"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vue-tsc && vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "server": "nodemon  --exec 'node  --loader ts-node/esm' src/server/index.ts"

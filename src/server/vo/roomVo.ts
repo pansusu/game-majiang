@@ -4,13 +4,14 @@ import PlayerVo from "./playerVo";
 
 
 export default class RoomVo {
-    roomNumber: string;
-    roomIsAlive: boolean;
-    status: string;
-    players: number;
-    countDown: number;
+    roomNumber: string = "";
+    players: number = 0;
     playersAll: Array<OtherPlayer> = [];
-    currentPlayer: string;
-    currentMj: Mj[];
-    discardedMj: Mj[];
+    roomIsAlive: boolean = true;
+    countDown: number = 0;
+    currentPlayer: string = "";
+    currentMj: Mj[] = [];
+    discardedMj: Mj[] = [];
+    status: string = "";
+    timer: NodeJS.Timer | null = null;
 }
