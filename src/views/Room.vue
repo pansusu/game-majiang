@@ -92,19 +92,16 @@ const sendDiscard = () => {
 		return;
 	}
 	if (!myMj.value) {
+		message.error("房间未开始");
 		return;
 	}
 
-	const mjs = readyDiscard.value
-		.map((item) => {
-			return myMj?.value ? ([item] as unknown as Mj) : null;
-		})
-		.filter((i) => i != null);
+	const mjs = readyDiscard.value.map((item) => myMj?.value?.[item] as Mj);
 
-	// 打了两只麻将，但是两张不一样
+	// 打了多只麻将，但多只不一样
 	if (
 		mjs.length >= 2 &&
-		!mjs.every((item, i, arr) => item?.name == arr[0]?.name)
+		!mjs.every((item, i, arr) => item.name == arr[0].name)
 	) {
 		message.error("没有这个打法");
 		return;
@@ -172,7 +169,6 @@ const stopGame = () => {
 	socket?.emit(Cons.MSG.DELETE_ROOM, uname);
 };
 
-// 刷新返回登录页面问题
 //用户重新返回了登录页面 要把用用户踢出，可以把用户列表打出来
 </script>
 <template>
