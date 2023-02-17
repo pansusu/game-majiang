@@ -45,12 +45,17 @@ export default class Player {
     peng(mj: Mj) {
         for (let i = 0; i <= 2; i++) {
             this.pan?.hadPeng?.push(mj)
+            console.log(mj);
         }
     }
     gang(mj: Mj) {
         // 记录分数
         // 进牌
         this.addCard()
+    }
+
+    isWin() {
+        this.pan?.huPai()
     }
 
     show(status?: string): PlayerVo {

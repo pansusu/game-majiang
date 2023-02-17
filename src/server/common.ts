@@ -32,7 +32,6 @@ export const shuffle = (data: Array<any>,) => {
     return data
 }
 
-
 interface Type<T> extends Function {
     new(...args: any[]): T;
 }

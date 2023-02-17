@@ -67,8 +67,10 @@ export default class Room {
      */
     sendRoomInfoToAllPlayers(): void {
         const roomInfo = this.getSendRoomInfo()
+        console.log("roomInfo: ", roomInfo);
         this.homePlayers.forEach(pl => {
             pl.socket.emit(Cons.MSG.ROOM_INFO, roomInfo)
+            console.log("发送");
             const pvo: PlayerVo = ReflectType.convert(PlayerVo, pl)
             pl.socket.emit(Cons.MSG.USER_INFO, pvo)
         })
@@ -117,6 +119,7 @@ export default class Room {
 
     distribute_action(player: Player) {
         player.addCard();
+        // player.isWin()
         this.setCurrentPlayer(player.uname)
         this.setState(player.uname, PLAYER_STATUS.Discard);
 
@@ -191,10 +194,14 @@ export default class Room {
         if (discardMjs.length == 2) {
             // peng
             this.clearTimeCountDown()
+            console.log("peng", discardMjs[0]);
             roomPlayer.peng(discardMjs[0]);
             this.setCurrentPlayer(uname)
+
+            console.log(" this.setCurrentPlayer(uname)", uname);
             this.setState(uname, PLAYER_STATUS.Peng);
             this.sendRoomInfoToAllPlayers()
+            console.log(" sendRoomInfoToAllPlayers");
         }
         if (discardMjs.length == 3) {
             // gang

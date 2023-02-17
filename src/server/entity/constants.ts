@@ -26,9 +26,9 @@ const Cons = Object.freeze({
         KEEP_ONLINE: '22',
     },
     STATUS: {
-        READY: '0',
-        RUNNING: '1',
-        ENDED: '2',
+        READY: '准备中',
+        RUNNING: '游戏中',
+        ENDED: '游戏结束',
     }
 })
 

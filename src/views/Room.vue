@@ -181,7 +181,7 @@ const stopGame = () => {
 		</div>
 
 		<!-- 桌盘 -->
-		<div v-show="pan" class="flex items-center justify-center mb-6 relative">
+		<div v-if="pan" class="flex items-center justify-center mb-6 relative">
 			<div class="min-w-[1300px] tx-clip h-[600px] bg-gray-700"></div>
 
 			<div class="min-w-[1300px] absolute h-[600px]">
@@ -189,7 +189,7 @@ const stopGame = () => {
 				<MaJiangDiscard
 					v-if="room?.discardedMj "
 					:mj-style="{fontSize:'12px',padding:'6px 13px'}"
-					:mjs="room.discardedMj"
+					:mjs="room?.discardedMj"
 				/>
 
 				<!-- 打的牌 -->
@@ -228,7 +228,7 @@ const stopGame = () => {
 		<!-- 桌盘 end -->
 
 		<!-- 进入游戏的好友 -->
-		<JoinRooMPlayer v-show="!pan" :roomMaster="roomMaster" :players="room?.playersAll" />
+		<JoinRooMPlayer v-else :roomMaster="roomMaster" :players="room?.playersAll || []" />
 
 		<!-- 暗杠 ，胡牌， 发牌, 游戏结束 -->
 		<div class="flex items-center justify-center w-full">

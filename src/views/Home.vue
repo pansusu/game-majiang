@@ -1,12 +1,10 @@
-
-
-<script lang="ts" setup>
+<script lang="tsx" setup>
 import RoomVo from "../server/vo/roomVo";
 import { inject, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import Cons from "../server/entity/constants";
 import Result from "../server/entity/result";
-import { useMessage } from "naive-ui";
+import { useMessage,NSpace,NButton } from "naive-ui";
 
 const socket: any = inject("socket");
 const message = useMessage();
@@ -60,6 +58,32 @@ onMounted(() => {
 		socket.emit(Cons.MSG.IS_LOGIN, uname);
 	}
 });
+
+const columns = [
+	{
+		title: "房间号",
+		key: "roomNumber",
+	},
+	{
+		title: "人数",
+		key: "players",
+	},
+	{
+		title: "状态",
+		key: "status",
+	},
+	{
+		title: "操作",
+		render: (row:RoomVo)=>{
+			return (
+					<NSpace>
+						<NButton onClick={()=>{joinGame(row.roomNumber)}} >加入</NButton>
+						<NButton  onClick={()=>{deleteRoom(row.roomNumber)}} >删除</NButton>
+					</NSpace>
+				);
+		}
+	}
+];
 </script>
 
 <template>
@@ -69,30 +93,7 @@ onMounted(() => {
 		>当前登录人：{{ uname }}</div>
 
 		<!-- <div class="flex"> -->
-		<div class="h-1/4 overflow-y-auto border px-4 py-3">
-			<div>
-				<div class="flex justify-between border-b pb-3">
-					<div>序号</div>
-					<div>房间号</div>
-					<div>人数</div>
-					<div>状态</div>
-					<div>操作</div>
-				</div>
-			</div>
-			<div v-if="rooms && rooms.length > 0" v-for="(item, index) in rooms" class="mt-3">
-				<div class="flex justify-between">
-					<div>{{ index + 1 }}</div>
-					<div>{{ item.roomNumber }}</div>
-					<div>{{ item.players }}</div>
-					<div>{{ item.status }}</div>
-					<n-space>
-						<n-button @click="joinGame(item.roomNumber)">加入</n-button>
-						<n-button @click="deleteRoom(item.roomNumber)">删除</n-button>
-					</n-space>
-				</div>
-			</div>
-			<div v-else class="text-center mt-3 text-gray-500">暂无房间</div>
-		</div>
+		<n-data-table :columns="columns" :data="rooms" :bordered="false" />
 		<!-- <Players /> -->
 		<!-- </div> -->
 	</div>

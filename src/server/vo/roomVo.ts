@@ -1,7 +1,7 @@
+import Cons from '../entity/constants.js';
 import Mj from '../entity/mj.js';
 import OtherPlayer from './otherPlayer.js';
 import PlayerVo from "./playerVo";
-
 
 export default class RoomVo {
     roomNumber: string = "";
@@ -12,6 +12,5 @@ export default class RoomVo {
     currentPlayer: string = "";
     currentMj: Mj[] = [];
     discardedMj: Mj[] = [];
-    status: string = "";
-    timer: NodeJS.Timer | null = null;
+    status: string = Cons.STATUS.READY;
 }

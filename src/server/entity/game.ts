@@ -141,6 +141,7 @@ export default class Game {
             return
         }
         this.rooms.get(player.roomNumber)?.setCurrentPlayer(uname)?.start(player)
+        this.showAllRooms()
     }
     gameStartByRoom(roomNumber: string): void {
         const room = this.rooms.get(roomNumber)

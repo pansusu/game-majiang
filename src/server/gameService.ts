@@ -47,9 +47,6 @@ export default class GameSocketService {
             this.game?.keepOnline(socket, uname)
         })
 
-        socket.on(Cons.MSG.SHOW_ROOMS, () => {
-            this.game?.showRooms(socket)
-        })
         socket.on(Cons.MSG.SHOW_PLAYERS, () => {
             this.game?.showPlayers(socket)
         })
@@ -66,19 +63,20 @@ export default class GameSocketService {
             this.game?.loadCurrentRoom(socket, uname, password)
         })
 
-        socket.on(Cons.MSG.GAME_START, (uname: string) => {
-            this.game?.gameStart(uname)
+        socket.on(Cons.MSG.SHOW_ROOMS, () => {
+            this.game?.showRooms(socket)
         })
 
         socket.on(Cons.MSG.DELETE_ROOM, (uname: string) => {
             this.game?.delete_room_force(uname)
         })
+
         socket.on(Cons.MSG.DELETE_ROOM_BY_ROOM_NUM, (roomData: any) => {
             this.game?.delete_room_force_by_room(roomData)
         })
 
-        socket.on('message', (msg: string) => {
-            console.log(msg)
+        socket.on(Cons.MSG.GAME_START, (uname: string) => {
+            this.game?.gameStart(uname)
         })
 
         // 出牌
@@ -87,6 +85,10 @@ export default class GameSocketService {
                 return
             }
             this.game?.player_discard_mj(uname, mjs)
+        })
+
+        socket.on('message', (msg: string) => {
+            console.log(msg)
         })
     }
 }
