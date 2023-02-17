@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import type OtherPlayer from "@/server/vo/OtherPlayer";
+import type OtherPlayer from "@/server/vo/OtherPlayer.js";
 import { HappyOutline } from "@vicons/ionicons5";
 
 interface Props {
